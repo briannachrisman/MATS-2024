@@ -7,12 +7,11 @@ from sae_lens.training.lm_runner import language_model_sae_runner
 
 # -----------------------------------------------------------------------------
 # default config values
-model_name = "gelu-2l" # 1
+model_name = "gelu-2l" 
 dataset_path = "NeelNanda/c4-tokenized-2b"
 
 total_training_steps = 400_000 
 batch_size = 4096 
-total_training_tokens = total_training_steps * batch_size
 new_cached_activations_path = (
     f"./cached_activations/{model_name}/{dataset_path}/{total_training_steps}"
 )
@@ -30,6 +29,7 @@ exec(open('configurator.py').read()) # overrides from command line or config fil
 config = {k: globals()[k] for k in config_keys} # will be useful for logging
 # -----------------------------------------------------------------------------
 
+total_training_tokens = total_training_steps * batch_size
 
 if torch.cuda.is_available():
     device = "cuda"
@@ -72,7 +72,7 @@ for l1_coefficient in l1_coefficients:
         use_cached_activations=False,
         #cached_activations_path="./gelu-2l",
         training_tokens=total_training_tokens,  # For initial testing I think this is a good number.
-        train_batch_size_tokens=4096,
+        train_batch_size_tokens=batch_size,
         # Loss Function
         ## Reconstruction Coefficient.
         mse_loss_normalization=None,  # MSE Loss Normalization is not mentioned (so we use stanrd MSE Loss). But not we take an average over the batch.
