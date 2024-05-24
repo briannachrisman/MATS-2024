@@ -84,7 +84,7 @@ class AutoEncoder(nn.Module):
     @classmethod
     def load(cls, version):
         cfg = (json.load(open(SAVE_DIR/(str(version)+"_cfg.json"), "r")))
-        pprint.pprint(cfg)
+        #pprint.pprint(cfg)
         self = cls(cfg=cfg)
         self.load_state_dict(torch.load(SAVE_DIR/(str(version)+".pt")))
         return self
