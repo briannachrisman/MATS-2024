@@ -50,3 +50,26 @@ class CR_AutoEncoder(nn.Module): # Connor and Rob's Autoencoder class
         self = cls(cfg=cfg)
         self.load_state_dict(utils.download_file_from_hf("ckkissane/tinystories-1M-SAES", f"{version}.pt", force_is_torch=True))
         return self
+    
+
+def standardize(data):
+    """ Standardize the data to have mean 0 and standard deviation 1 along the first axis """
+    mean = data.mean(dim=0, keepdim=True)
+    std = data.std(dim=0, keepdim=True, unbiased=False)
+    return (data - mean) / std
+
+def compute_corr_matrix(latents1, latents2):
+
+    assert latents1.shape[0] == latents2.shape[0], "number of data points need to be the same"
+
+    # Standardize latents1 and latents2
+    latents1_standard = standardize(latents1)
+    latents2_standard = standardize(latents2)
+
+    # TODO: decide whether to divide by latents1.shape[0] or latents1.shape[0] - 1
+    # Compute the dot product of the transposes of the standardized matrices
+    corr_matrix = torch.mm(latents1_standard.t(), latents2_standard) / (latents1.shape[0]-1)
+
+    #print(f"correlation_matrix has shape: {corr_matrix.shape}")
+
+    return corr_matrix
