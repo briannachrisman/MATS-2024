@@ -59,3 +59,13 @@ def AttnToHookedCfg(attn_sae_cfg):
         "hook_name": attn_sae_cfg["act_name"],
     }
     return HookedSAEConfig.from_dict(new_cfg)
+
+
+def GetHeadContributions(concat_vector):
+    splits = torch.split(concat_vector, model.cfg.d_head, dim=1)
+
+    # Turn list of tensors into a single tenso
+    splits = torch.stack(splits, dim=0)
+    contributions = (splits**2).sum(dim=2)
+    contributions = contributions/contributions.sum(dim=0, keepdim=True)
+    return contributions
