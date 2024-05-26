@@ -77,7 +77,7 @@ def standardize(data):
     return (data - mean) / std
 
 def compute_corr_matrix(latents1, latents2):
-
+    """latents1 and latents2 have shape: (B, L)"""
     assert latents1.shape[0] == latents2.shape[0], "number of data points need to be the same"
 
     # Standardize latents1 and latents2
@@ -125,7 +125,6 @@ def get_ckpt_dir(hook_point_head_index):
 
 # concatenate our SAEs into an SAE that decomposes concatenated activations
 
-
 def load_our_sae(hook_point_head_index):
     print(f"Loading SAE for head # {hook_point_head_index}")
     ckpt_dir = get_ckpt_dir(hook_point_head_index)
@@ -134,6 +133,13 @@ def load_our_sae(hook_point_head_index):
     activations_loader.device = "cpu"
     sae = sae.autoencoders[sae_name]
     sae.eval()
+    
+    # rescale weights and biases as per Anthropic's April update
+    dec_norms = sae.W_dec.norm(dim=-1)
+    sae.W_enc *= dec_norms
+    sae.b_enc *= dec_norms
+    sae.W_dec /= dec_norms[:, None]
+    
     return model, sae, activations_loader
 
 def load_our_saes():
