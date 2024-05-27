@@ -42,3 +42,14 @@ def ResidStreamMaxSim(sae1, sae2, remove_diag=False):
     if remove_diag:
       dot_prods_resid = dot_prods_resid * (1 - t.eye(dot_prods_resid.shape[0], dot_prods_resid.shape[0]))
     return dot_prods_resid.max(dim=0), dot_prods_resid.max(dim=1)
+
+
+
+def GetHeadContributions(concat_vector, d_head=64):
+    splits = t.split(concat_vector, d_head, dim=1)
+
+    # Turn list of tensors into a single tenso
+    splits = t.stack(splits, dim=0)
+    contributions = (splits**2).sum(dim=2)
+    contributions = contributions/contributions.sum(dim=0, keepdim=True)
+    return contributions
