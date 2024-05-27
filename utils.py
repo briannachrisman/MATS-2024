@@ -77,7 +77,8 @@ def standardize(data):
     return (data - mean) / std
 
 def compute_corr_matrix(latents1, latents2):
-    """latents1 and latents2 have shape: (B, L)"""
+    """latents1 and latents2 are 2-d tensors. Corr matrix is computed
+    along the second dimension."""
     assert latents1.shape[0] == latents2.shape[0], "number of data points need to be the same"
 
     # Standardize latents1 and latents2
@@ -135,11 +136,12 @@ def load_our_sae(hook_point_head_index):
     sae.eval()
     
     # rescale weights and biases as per Anthropic's April update
-    dec_norms = sae.W_dec.norm(dim=-1)
-    sae.W_enc *= dec_norms
-    sae.b_enc *= dec_norms
-    sae.W_dec /= dec_norms[:, None]
-    
+    if not sae.cfg.normalize_sae_decoder: 
+        dec_norms = sae.W_dec.norm(dim=-1)
+        sae.W_enc *= dec_norms
+        sae.b_enc *= dec_norms
+        sae.W_dec /= dec_norms[:, None]
+        
     return model, sae, activations_loader
 
 def load_our_saes():
