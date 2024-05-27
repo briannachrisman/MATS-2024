@@ -7,10 +7,9 @@ from transformer_lens import HookedTransformer
 import einops
 import numpy as np
 from eindex import eindex
-
 Arr = np.ndarray
 
-def k_largest_indices(
+def k_largest_indices_old(
     x: Float[Tensor, "rows cols"],
     k: int,
     largest: bool = True,
@@ -24,9 +23,33 @@ def k_largest_indices(
     to append them to the left/right of the sequence. We should only be allowed from [5:-5] in this case.
     '''
     x = x[:, buffer[0]:-buffer[1]]
-    indices = x.flatten().topk(k=k, largest=largest).indices
-    rows = indices // x.size(1)
-    cols = indices % x.size(1) + buffer[0]
+    max_of_each_row, argmax_cols = x.max(dim=1)
+    argmax_rows = max_of_each_row.topk(k=k, largest=largest).indices    
+
+    rows = argmax_rows
+    cols = argmax_cols + buffer[0]
+    return torch.stack((rows, cols), dim=1)
+
+
+def k_largest_indices(
+    x,
+    k: int,
+    largest: bool = True,
+    buffer= (5, 5)
+):
+    '''w
+    Given a 2D array, returns the indices of the top or bottom `k` elements.
+
+    Also has a `buffer` argument, which makes sure we don't pick too close to the left/right of sequence. If `buffer`
+    is (5, 5), that means we shouldn't be allowed to pick the first or last 5 sequence positions, because we'll need
+    to append them to the left/right of the sequence. We should only be allowed from [5:-5] in this case.
+    '''
+    x = x[:, buffer[0]:-buffer[1]]
+    max_of_each_row, argmax_of_each_row = x.max(dim=1)
+    top_rows = max_of_each_row.topk(k=k, largest=largest).indices    
+
+    rows = top_rows
+    cols = argmax_of_each_row[top_rows] + buffer[0]
     return torch.stack((rows, cols), dim=1)
 
 
