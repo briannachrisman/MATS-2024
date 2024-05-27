@@ -145,7 +145,6 @@ class AutoEncoder(nn.Module):
         return self
     
 
-
 from sae_visualizer.utils_fns import sample_unique_indices, TopK, k_largest_indices, random_range_indices, reshape, to_str_tokens
 
 
@@ -262,10 +261,10 @@ def get_seq_data(
         calculate the effect of feature ablation,  i.e. x^j <- x^j - f_i(x^j)d_i for i = feature_idx, only on the tokens we care
         about (the ones which will appear in the visualisation).
         '''
-        if encoder.cfg["concat_heads"]:
-            act = einops.rearrange(
-                act, "batch seq n_heads d_head -> batch seq (n_heads d_head)",
-            )
+        #if encoder.cfg["concat_heads"]:
+        act = einops.rearrange(
+            act, "batch seq n_heads d_head -> batch seq (n_heads d_head)",
+        )
         x_cent = act - encoder.b_dec
         feat_acts_pre = einops.einsum(x_cent, feature_act_dir, "batch seq act_size, act_size feats -> batch seq feats")
         feat_acts = F.relu(feat_acts_pre + feature_bias)
@@ -276,7 +275,7 @@ def get_seq_data(
     # Run the model without hook (to store all the information we need, not to actually return anything)
     for _tokens in all_tokens:
         model.run_with_hooks(_tokens, return_type=None, fwd_hooks=[
-            (encoder.cfg["act_name"], hook_fn_act_post),
+            (encoder.cfg.hook_point, hook_fn_act_post),
         ])
 
     # Stack the results, and check shapes
