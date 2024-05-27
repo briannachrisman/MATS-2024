@@ -1,4 +1,9 @@
 """
+This file is borrowed from nanoGPT as I (Ali) also like the simplicity of
+not having to prepend config or args to every variable.
+
+-----------------------------------------------------------------------------
+
 Poor Man's Configurator. Probably a terrible idea. Example usage:
 $ python train.py config/override_file.py --batch_size=32
 this will first run config/override_file.py, then override batch_size to 32

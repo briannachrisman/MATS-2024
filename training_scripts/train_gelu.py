@@ -8,9 +8,9 @@ from sae_lens.training.lm_runner import language_model_sae_runner
 # -----------------------------------------------------------------------------
 # default config values
 model_name = "gelu-2l" 
-dataset_path = "NeelNanda/c4-tokenized-2b"
+dataset_path = "NeelNanda/c4-code-tokenized-2b"
 
-total_training_steps = 400_000 
+total_training_steps = 250_000 
 batch_size = 4096 
 new_cached_activations_path = (
     f"./cached_activations/{model_name}/{dataset_path}/{total_training_steps}"
@@ -105,7 +105,7 @@ for l1_coefficient in l1_coefficients:
         # Buffer details won't matter in we cache / shuffle our activations ahead of time.
         n_batches_in_buffer=64,
         store_batch_size_prompts=16,
-        normalize_activations=False,
+        normalize_activations=True, # TODO: why is the scaling factor 1.0 even when this is True?
         # Feature Store
         feature_sampling_window=1000,
         dead_feature_window=1000,
